@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ComposePlan</string>
+    <string name="label_out_put">支出:%s元</string>
+</resources>
