@@ -11,7 +11,9 @@ import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.List
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.frank.plan.R
+import com.frank.plan.data.ItemTabData
 import kotlin.random.Random
 
 @Preview(showBackground = true)
@@ -94,17 +97,32 @@ fun DayBill() {
 
 
 @Composable
-fun ItemType(isUsedForTab: Boolean = false, modifier: Modifier) {
+fun ItemType(
+    modifier: Modifier, itemUiData: ItemTabData = ItemTabData(
+        "餐饮",
+        iconResource = painterResource(id = R.drawable.ic_launcher_foreground)
+    )
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            modifier = Modifier.size(40.dp),
-            contentDescription = "test type"
-        )
-        Text(text = "餐饮")
+        val iconModifier = Modifier.size(40.dp)
+        val contentDesc = "test type"
+        if (itemUiData.icon != null) {
+            Icon(
+                imageVector = itemUiData.icon!!,
+                modifier = iconModifier,
+                contentDescription = contentDesc
+            )
+        } else if (itemUiData.iconResource != null) {
+            Icon(
+                painter = itemUiData.iconResource!!,
+                modifier = iconModifier,
+                contentDescription = contentDesc
+            )
+        }
+        Text(text = itemUiData.name)
     }
 }
 
@@ -189,26 +207,20 @@ fun InputMoney() {
 
 @Composable
 fun BottomBar(modifier: Modifier) {
+    val tabAdd = ItemTabData("添加", icon = Icons.Default.Add)
+    val tabList = ItemTabData("列表", icon = Icons.Default.List)
     Row(modifier = modifier) {
         ItemType(
             modifier = Modifier
                 .padding(start = 10.dp, end = 10.dp)
-                .weight(1f)
+                .weight(1f),
+            itemUiData = tabList
         )
         ItemType(
             modifier = Modifier
                 .padding(start = 10.dp, end = 10.dp)
-                .weight(1f)
-        )
-        ItemType(
-            modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp)
-                .weight(1f)
-        )
-        ItemType(
-            modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp)
-                .weight(1f)
+                .weight(1f),
+            itemUiData = tabAdd
         )
     }
 }
