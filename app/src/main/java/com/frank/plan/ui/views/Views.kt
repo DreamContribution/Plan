@@ -1,6 +1,9 @@
 package com.frank.plan.ui.views
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
@@ -17,15 +20,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.frank.plan.R
+import kotlin.random.Random
 
-
-@Preview(name = "item-day", showBackground = true)
+@Preview(showBackground = true)
 @Composable
-fun DayInfo() {
+fun DayTotalInfo() {
     Column {
         Row(
             modifier = Modifier
@@ -40,18 +42,19 @@ fun DayInfo() {
                 fontSize = 10.sp
             )
         }
-        Divider(color = Color.Red, thickness = 0.5.dp)
+        Divider(color = Color.Gray, thickness = 0.5.dp)
     }
 }
 
-@Preview(name = "Item-Bill", showBackground = true)
+
 @Composable
-fun ItemBill() {
+fun ItemBill(showDivider: Boolean) {
     Column {
         Row(
             modifier = Modifier
                 .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 10.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .background(Color.Transparent),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -69,15 +72,31 @@ fun ItemBill() {
                 Text(text = "-12.3")
             }
         }
-        Divider(color = Color.Red, thickness = 0.5.dp, modifier = Modifier.padding(start = 54.dp))
+        if (showDivider) {
+            Divider(
+                color = Color.Gray,
+                thickness = 0.5.dp,
+                modifier = Modifier.padding(start = 54.dp)
+            )
+        }
     }
 }
 
-@Preview(name = "ItemType", showBackground = true)
+
 @Composable
-fun ItemType() {
+fun DayBill() {
+    DayTotalInfo()
+    val count = Random.nextInt(1, 10)
+    for (i in 1..count) {
+        ItemBill(i != count)
+    }
+}
+
+
+@Composable
+fun ItemType(isUsedForTab: Boolean = false, modifier: Modifier) {
     Column(
-        modifier = Modifier.padding(start = 10.dp, end = 10.dp),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
@@ -93,9 +112,18 @@ fun ItemType() {
 @ExperimentalFoundationApi
 @Composable
 fun GridTest() {
-    LazyVerticalGrid(cells = GridCells.Fixed(4)) {
+    LazyVerticalGrid(
+        cells = GridCells.Fixed(4),
+        modifier = Modifier.border(
+            border = BorderStroke(
+                1.dp,
+                color = Color.Red
+            )
+        ),
+//        contentPadding = PaddingValues(10.dp)
+    ) {
         items(2000) {
-            ItemType()
+            ItemType(modifier = Modifier.padding(start = 10.dp, end = 10.dp))
         }
     }
 }
@@ -123,17 +151,16 @@ fun MonthSelectButton() {
 
 
 @Composable
-fun RecordTotal() {
-    Column {
-        Text(text = "支出", fontSize = 15.sp, fontWeight = FontWeight.W100)
+fun MonthlyRecordTotal(label: String, modifier: Modifier) {
+    Column(modifier = modifier) {
+        Text(text = label, fontSize = 15.sp, fontWeight = FontWeight.W100)
         Text(text = "100.00", fontSize = 22.sp, fontWeight = FontWeight.W200)
     }
 }
 
 
-@Preview(name = "TotalRecord", showBackground = true)
 @Composable
-fun TotalRecord() {
+fun MonthlyInfo() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -142,6 +169,47 @@ fun TotalRecord() {
     ) {
         MonthSelectButton()
         Spacer(modifier = Modifier.width(30.dp))
-        RecordTotal()
+        MonthlyRecordTotal(label = "收入", modifier = Modifier.weight(1f))
+        MonthlyRecordTotal(label = "支出", modifier = Modifier.weight(1f))
     }
 }
+
+@Preview(name = "InputRemark", showBackground = true)
+@Composable
+fun InputMoney() {
+    Row(
+        horizontalArrangement = Arrangement.End,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text("0")
+        Spacer(modifier = Modifier.width(10.dp))
+    }
+}
+
+
+@Composable
+fun BottomBar(modifier: Modifier) {
+    Row(modifier = modifier) {
+        ItemType(
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp)
+                .weight(1f)
+        )
+        ItemType(
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp)
+                .weight(1f)
+        )
+        ItemType(
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp)
+                .weight(1f)
+        )
+        ItemType(
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp)
+                .weight(1f)
+        )
+    }
+}
+

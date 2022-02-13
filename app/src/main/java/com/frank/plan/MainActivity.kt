@@ -1,31 +1,41 @@
 package com.frank.plan
 
+import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.frank.plan.ui.theme.ComposePlanTheme
-import com.frank.plan.ui.views.DayInfo
-import com.frank.plan.ui.views.GridTest
-import com.frank.plan.ui.views.MonthSelectButton
+import androidx.room.Room
+import com.frank.plan.data.Bill
+import com.frank.plan.data.BillDataBase
+import com.frank.plan.ui.views.HistoryList
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MonthSelectButton()
+            HistoryList()
         }
     }
+
+    companion object {
+        const val TAG = "MainActivity"
+    }
+}
+
+fun dataBaseTest(context: Application) {
+    val db =
+        Room.databaseBuilder(context, BillDataBase::class.java, "bill")
+            .build()
+
+    val billDao = db.billDao()
+
+    val itemBill = Bill(value = 20.0, type = 1)
+    Log.d(MainActivity.TAG, "onCreate: itemBill:$itemBill")
+    billDao.addBill(Bill(value = 20.0, type = 1))
+
+    val allBill = billDao.getAllBill()[0]
+    Log.d(MainActivity.TAG, "onCreate: allBill:$allBill")
 }
