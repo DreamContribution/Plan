@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.frank.plan.R
 import com.frank.plan.data.ItemTabData
-import kotlin.random.Random
 
 @Preview(showBackground = true)
 @Composable
@@ -87,9 +86,9 @@ fun ItemBill(showDivider: Boolean) {
 
 
 @Composable
-fun DayBill() {
+fun DayBill(count: Int) {
     DayTotalInfo()
-    val count = Random.nextInt(1, 10)
+//    val count = Random.nextInt(1, 10)
     for (i in 1..count) {
         ItemBill(i != count)
     }
@@ -138,7 +137,6 @@ fun GridTest() {
                 color = Color.Red
             )
         ),
-//        contentPadding = PaddingValues(10.dp)
     ) {
         items(2000) {
             ItemType(modifier = Modifier.padding(start = 10.dp, end = 10.dp))

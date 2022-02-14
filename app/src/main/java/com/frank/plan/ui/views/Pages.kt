@@ -23,8 +23,10 @@ fun HistoryList() {
         Text(text = "轻松记账", fontSize = 40.sp, fontWeight = FontWeight.W900)
         MonthlyInfo()
         LazyColumn(modifier = Modifier.weight(1f)) {
-            items(10) {
-                DayBill()
+            var count = 1
+            items(5) {
+                DayBill(count)
+                count++
             }
         }
         BottomBar(modifier = Modifier.wrapContentHeight())

@@ -68,7 +68,7 @@ interface BillDao {
 
 }
 
-@Database(entities = [Bill::class], version = 1)
+@Database(entities = [Bill::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class BillDataBase : RoomDatabase() {
     abstract fun billDao(): BillDao
