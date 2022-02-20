@@ -9,14 +9,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.room.Room
 import com.frank.plan.data.Bill
 import com.frank.plan.data.BillDataBase
-import com.frank.plan.ui.views.HistoryList
+import com.frank.plan.ui.views.MainView
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            HistoryList()
+            MainView()
         }
     }
 

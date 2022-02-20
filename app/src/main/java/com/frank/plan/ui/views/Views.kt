@@ -1,9 +1,6 @@
 package com.frank.plan.ui.views
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
@@ -106,7 +103,7 @@ fun ItemType(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val iconModifier = Modifier.size(40.dp)
+        val iconModifier = Modifier.size(24.dp)
         val contentDesc = "test type"
         if (itemUiData.icon != null) {
             Icon(
@@ -121,7 +118,7 @@ fun ItemType(
                 contentDescription = contentDesc
             )
         }
-        Text(text = itemUiData.name)
+        Text(text = itemUiData.name, fontSize = 10.sp)
     }
 }
 
@@ -141,6 +138,15 @@ fun GridTest() {
         items(2000) {
             ItemType(modifier = Modifier.padding(start = 10.dp, end = 10.dp))
         }
+    }
+}
+
+@ExperimentalFoundationApi
+@Composable
+fun AddView() {
+    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = "记一笔")
+        GridTest()
     }
 }
 
@@ -204,20 +210,20 @@ fun InputMoney() {
 
 
 @Composable
-fun BottomBar(modifier: Modifier) {
+fun BottomBar(modifier: Modifier, onTabClick: (index: Int) -> Unit) {
     val tabAdd = ItemTabData("添加", icon = Icons.Default.Add)
     val tabList = ItemTabData("列表", icon = Icons.Default.List)
-    Row(modifier = modifier) {
+    Row(modifier = Modifier.wrapContentHeight()) {
         ItemType(
             modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp)
-                .weight(1f),
+                .weight(1f)
+                .clickable { onTabClick(0) },
             itemUiData = tabList
         )
         ItemType(
             modifier = Modifier
-                .padding(start = 10.dp, end = 10.dp)
-                .weight(1f),
+                .weight(1f)
+                .clickable { onTabClick(1) },
             itemUiData = tabAdd
         )
     }
