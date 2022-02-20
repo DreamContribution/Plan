@@ -1,11 +1,9 @@
 package com.frank.plan.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Typography
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 
 private val DarkColorPalette = darkColors(
     primary = Purple200,
@@ -45,4 +43,16 @@ fun ComposePlanTheme(
         shapes = Shapes,
         content = content
     )
+}
+
+object ComposePlanTheme {
+    /**
+     * Retrieves the current [Colors] at the call site's position in the hierarchy.
+     *
+     * @sample androidx.compose.material.samples.ThemeColorSample
+     */
+    val colors: Colors
+        @Composable
+        @ReadOnlyComposable
+        get() = LightColorPalette
 }

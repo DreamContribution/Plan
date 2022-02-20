@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
@@ -25,6 +26,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.frank.plan.ui.theme.ComposePlanTheme
 
 
 const val TAG = "HistoryList"
@@ -32,13 +34,23 @@ const val TAG = "HistoryList"
 const val History = "HistoryList"
 const val ADD = "Add"
 
+@Preview(showBackground = true)
 @Composable
 fun HistoryList() {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text = "轻松记账", fontSize = 40.sp, fontWeight = FontWeight.W900)
+        Text(
+            modifier = Modifier
+                .background(ComposePlanTheme.colors.primary)
+                .fillMaxWidth(),
+            text = "轻松记账",
+            fontSize = 40.sp,
+            fontWeight = FontWeight.W900,
+            textAlign = TextAlign.Center
+        )
         MonthlyInfo()
         LazyColumn {
             var count = 1
@@ -47,7 +59,6 @@ fun HistoryList() {
                 count++
             }
         }
-//        BottomBar(modifier = Modifier.wrapContentHeight())
     }
 }
 

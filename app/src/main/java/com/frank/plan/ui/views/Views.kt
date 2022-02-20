@@ -1,6 +1,8 @@
 package com.frank.plan.ui.views
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
@@ -23,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.frank.plan.R
 import com.frank.plan.data.ItemTabData
+import com.frank.plan.ui.theme.Purple500
 
 @Preview(showBackground = true)
 @Composable
@@ -103,7 +106,7 @@ fun ItemType(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val iconModifier = Modifier.size(24.dp)
+        val iconModifier = Modifier.size(30.dp)
         val contentDesc = "test type"
         if (itemUiData.icon != null) {
             Icon(
@@ -118,7 +121,7 @@ fun ItemType(
                 contentDescription = contentDesc
             )
         }
-        Text(text = itemUiData.name, fontSize = 10.sp)
+        Text(text = itemUiData.name, fontSize = 14.sp)
     }
 }
 
@@ -128,12 +131,6 @@ fun ItemType(
 fun GridTest() {
     LazyVerticalGrid(
         cells = GridCells.Fixed(4),
-        modifier = Modifier.border(
-            border = BorderStroke(
-                1.dp,
-                color = Color.Red
-            )
-        ),
     ) {
         items(2000) {
             ItemType(modifier = Modifier.padding(start = 10.dp, end = 10.dp))
@@ -145,7 +142,7 @@ fun GridTest() {
 @Composable
 fun AddView() {
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "记一笔")
+        Text(text = "记一笔", fontSize = 30.sp, fontWeight = FontWeight.W500)
         GridTest()
     }
 }
@@ -185,6 +182,7 @@ fun MonthlyRecordTotal(label: String, modifier: Modifier) {
 fun MonthlyInfo() {
     Row(
         modifier = Modifier
+            .background(color = Purple500)
             .fillMaxWidth()
             .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
