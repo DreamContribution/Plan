@@ -44,7 +44,7 @@ fun HistoryList() {
     ) {
         Text(
             modifier = Modifier
-                .background(ComposePlanTheme.colors.primary)
+                .background(ComposePlanTheme.colors.primaryVariant)
                 .fillMaxWidth(),
             text = "轻松记账",
             fontSize = 40.sp,

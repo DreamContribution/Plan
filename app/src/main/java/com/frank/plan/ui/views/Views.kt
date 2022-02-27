@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.frank.plan.R
 import com.frank.plan.data.ItemTabData
-import com.frank.plan.ui.theme.Purple500
+import com.frank.plan.ui.theme.ComposePlanTheme
 
 @Preview(showBackground = true)
 @Composable
@@ -182,7 +182,7 @@ fun MonthlyRecordTotal(label: String, modifier: Modifier) {
 fun MonthlyInfo() {
     Row(
         modifier = Modifier
-            .background(color = Purple500)
+            .background(color = ComposePlanTheme.colors.primaryVariant)
             .fillMaxWidth()
             .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
