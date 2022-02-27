@@ -38,8 +38,8 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
-        kotlinCompilerVersion '1.5.21'
+        kotlinCompilerExtensionVersion '1.0.1'
+        kotlinCompilerVersion '1.6.10'
     }
     packagingOptions {
         resources {

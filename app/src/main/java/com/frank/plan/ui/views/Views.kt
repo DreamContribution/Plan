@@ -13,7 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.List
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.frank.plan.R
-import com.frank.plan.data.ItemTabData
+import com.frank.plan.data.ItemTabUIData
 import com.frank.plan.ui.theme.ComposePlanTheme
 
 @Preview(showBackground = true)
@@ -97,31 +97,39 @@ fun DayBill(count: Int) {
 
 @Composable
 fun ItemType(
-    modifier: Modifier, itemUiData: ItemTabData = ItemTabData(
+    modifier: Modifier = Modifier, itemUiUIData: ItemTabUIData = ItemTabUIData(
         "餐饮",
         iconResource = painterResource(id = R.drawable.ic_launcher_foreground)
     )
 ) {
+    var uiState by remember {
+        mutableStateOf(false)
+    }
     Column(
-        modifier = modifier,
+        modifier = Modifier
+            .clickable {
+                uiState = !uiState
+            },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val iconModifier = Modifier.size(30.dp)
+        val iconModifier = Modifier.size(40.dp)
         val contentDesc = "test type"
-        if (itemUiData.icon != null) {
+        if (itemUiUIData.icon != null) {
             Icon(
-                imageVector = itemUiData.icon!!,
+                imageVector = itemUiUIData.icon!!,
                 modifier = iconModifier,
-                contentDescription = contentDesc
+                contentDescription = contentDesc,
+                tint = if (uiState) Color.Red else Color.Black
             )
-        } else if (itemUiData.iconResource != null) {
+        } else if (itemUiUIData.iconResource != null) {
             Icon(
-                painter = itemUiData.iconResource!!,
+                painter = itemUiUIData.iconResource!!,
                 modifier = iconModifier,
-                contentDescription = contentDesc
+                contentDescription = contentDesc,
+                tint = if (uiState) Color.Red else Color.Black
             )
         }
-        Text(text = itemUiData.name, fontSize = 14.sp)
+        Text(text = itemUiUIData.name, fontSize = 14.sp)
     }
 }
 
@@ -133,7 +141,7 @@ fun GridTest() {
         cells = GridCells.Fixed(4),
     ) {
         items(2000) {
-            ItemType(modifier = Modifier.padding(start = 10.dp, end = 10.dp))
+            ItemType()
         }
     }
 }
@@ -209,20 +217,20 @@ fun InputMoney() {
 
 @Composable
 fun BottomBar(modifier: Modifier, onTabClick: (index: Int) -> Unit) {
-    val tabAdd = ItemTabData("添加", icon = Icons.Default.Add)
-    val tabList = ItemTabData("列表", icon = Icons.Default.List)
+    val tabAdd = ItemTabUIData("添加", icon = Icons.Default.Add)
+    val tabList = ItemTabUIData("列表", icon = Icons.Default.List)
     Row(modifier = Modifier.wrapContentHeight()) {
         ItemType(
             modifier = Modifier
                 .weight(1f)
                 .clickable { onTabClick(0) },
-            itemUiData = tabList
+            itemUiUIData = tabList
         )
         ItemType(
             modifier = Modifier
                 .weight(1f)
                 .clickable { onTabClick(1) },
-            itemUiData = tabAdd
+            itemUiUIData = tabAdd
         )
     }
 }
