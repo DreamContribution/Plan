@@ -111,16 +111,3 @@ fun NavHostZone(
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun TestOfSurface() {
-    Icon(
-        imageVector = Icons.Default.Add,
-        contentDescription = "Add ",
-        tint = Color.Blue,
-        modifier = Modifier.background(
-            Color.Red
-        )
-    )
-}

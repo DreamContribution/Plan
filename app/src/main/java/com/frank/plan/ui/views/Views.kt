@@ -6,25 +6,30 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.List
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.frank.plan.R
 import com.frank.plan.data.ItemTabUIData
+import com.frank.plan.data.PlanModel
+import com.frank.plan.data.generatedInputData
+import com.frank.plan.data.inputCallBack
 import com.frank.plan.ui.theme.ComposePlanTheme
 
 @Preview(showBackground = true)
@@ -97,38 +102,38 @@ fun DayBill(count: Int) {
 
 @Composable
 fun ItemType(
-    modifier: Modifier = Modifier, itemUiUIData: ItemTabUIData = ItemTabUIData(
+    itemUiUIData: ItemTabUIData = ItemTabUIData(
         "餐饮",
         iconResource = painterResource(id = R.drawable.ic_launcher_foreground)
-    )
+    ), viewModel: PlanModel, index: Int
 ) {
-    var uiState by remember {
-        mutableStateOf(false)
-    }
     Column(
         modifier = Modifier
             .clickable {
-                uiState = !uiState
+                viewModel.targetAddType = index
             },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val iconModifier = Modifier.size(40.dp)
         val contentDesc = "test type"
-        if (itemUiUIData.icon != null) {
-            Icon(
-                imageVector = itemUiUIData.icon!!,
-                modifier = iconModifier,
-                contentDescription = contentDesc,
-                tint = if (uiState) Color.Red else Color.Black
-            )
-        } else if (itemUiUIData.iconResource != null) {
-            Icon(
-                painter = itemUiUIData.iconResource!!,
-                modifier = iconModifier,
-                contentDescription = contentDesc,
-                tint = if (uiState) Color.Red else Color.Black
-            )
+        Surface(modifier = Modifier.background(Color.LightGray)) {
+            if (itemUiUIData.icon != null) {
+                Icon(
+                    imageVector = itemUiUIData.icon!!,
+                    modifier = iconModifier,
+                    contentDescription = contentDesc,
+                    tint = if (viewModel.targetAddType == index) Color.Red else Color.Black
+                )
+            } else if (itemUiUIData.iconResource != null) {
+                Icon(
+                    painter = itemUiUIData.iconResource!!,
+                    modifier = iconModifier,
+                    contentDescription = contentDesc,
+                    tint = if (viewModel.targetAddType == index) Color.Red else Color.Black
+                )
+            }
         }
+
         Text(text = itemUiUIData.name, fontSize = 14.sp)
     }
 }
@@ -136,12 +141,15 @@ fun ItemType(
 
 @ExperimentalFoundationApi
 @Composable
-fun GridTest() {
+fun GridTest(modifier: Modifier) {
+    val planModel: PlanModel = viewModel()
     LazyVerticalGrid(
         cells = GridCells.Fixed(4),
+        modifier = modifier
     ) {
-        items(2000) {
-            ItemType()
+
+        items(100) {
+            ItemType(viewModel = planModel, index = it)
         }
     }
 }
@@ -149,12 +157,51 @@ fun GridTest() {
 @ExperimentalFoundationApi
 @Composable
 fun AddView() {
+    val viewModel: PlanModel = viewModel()
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "记一笔", fontSize = 30.sp, fontWeight = FontWeight.W500)
-        GridTest()
+        GridTest(modifier = Modifier.weight(1f))
+        if (viewModel.targetAddType != -1) {
+            InfoInput()
+        }
     }
 }
 
+// 输入数据界面
+@OptIn(ExperimentalFoundationApi::class)
+@Preview(showBackground = true, name = "InfoInput")
+@Composable
+fun InfoInput(modifier: Modifier = Modifier) {
+    val generatedInputData = generatedInputData()
+    val planModel: PlanModel = viewModel()
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
+        Text(
+            text = planModel.addString,
+            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp, end = 10.dp)
+        )
+        LazyVerticalGrid(cells = GridCells.Fixed(4)) {
+            items(generatedInputData) {
+                InfoInputItem(it.content, it.type) { content, type ->
+                    inputCallBack(content, type, planModel)
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun InfoInputItem(data: String, type: Int, onClick: (String, Int) -> Unit) {
+    Text(
+        text = data,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .clickable {
+                onClick(data, type)
+            }
+            .padding(top = 16.dp, bottom = 16.dp)
+    )
+}
 
 @Composable
 fun MonthSelectButton() {
@@ -211,27 +258,6 @@ fun InputMoney() {
     ) {
         Text("0")
         Spacer(modifier = Modifier.width(10.dp))
-    }
-}
-
-
-@Composable
-fun BottomBar(modifier: Modifier, onTabClick: (index: Int) -> Unit) {
-    val tabAdd = ItemTabUIData("添加", icon = Icons.Default.Add)
-    val tabList = ItemTabUIData("列表", icon = Icons.Default.List)
-    Row(modifier = Modifier.wrapContentHeight()) {
-        ItemType(
-            modifier = Modifier
-                .weight(1f)
-                .clickable { onTabClick(0) },
-            itemUiUIData = tabList
-        )
-        ItemType(
-            modifier = Modifier
-                .weight(1f)
-                .clickable { onTabClick(1) },
-            itemUiUIData = tabAdd
-        )
     }
 }
 
