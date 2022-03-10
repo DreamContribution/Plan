@@ -26,7 +26,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.frank.plan.ui.theme.ComposePlanTheme
+import com.frank.plan.ui.theme.PlanTheme
 
 
 const val TAG = "HistoryList"
@@ -44,7 +44,7 @@ fun HistoryList() {
     ) {
         Text(
             modifier = Modifier
-                .background(ComposePlanTheme.colors.primaryVariant)
+                .background(PlanTheme.colors.bottomBar)
                 .fillMaxWidth(),
             text = "轻松记账",
             fontSize = 40.sp,

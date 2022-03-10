@@ -6,7 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
@@ -16,6 +16,8 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -30,7 +32,7 @@ import com.frank.plan.data.ItemTabUIData
 import com.frank.plan.data.PlanModel
 import com.frank.plan.data.generatedInputData
 import com.frank.plan.data.inputCallBack
-import com.frank.plan.ui.theme.ComposePlanTheme
+import com.frank.plan.ui.theme.PlanTheme
 
 @Preview(showBackground = true)
 @Composable
@@ -179,9 +181,11 @@ fun InfoInput(modifier: Modifier = Modifier) {
             text = planModel.addString,
             modifier = Modifier.padding(top = 4.dp, bottom = 4.dp, end = 10.dp)
         )
-        LazyVerticalGrid(cells = GridCells.Fixed(4)) {
-            items(generatedInputData) {
-                InfoInputItem(it.content, it.type) { content, type ->
+        LazyVerticalGrid(
+            cells = GridCells.Fixed(4)
+        ) {
+            itemsIndexed(generatedInputData, spans = null) { index, it ->
+                InfoInputItem(index, it.content, it.type) { content, type ->
                     inputCallBack(content, type, planModel)
                 }
             }
@@ -191,13 +195,44 @@ fun InfoInput(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun InfoInputItem(data: String, type: Int, onClick: (String, Int) -> Unit) {
+fun InfoInputItem(index: Int, data: String, type: Int, onClick: (String, Int) -> Unit) {
     Text(
         text = data,
         textAlign = TextAlign.Center,
         modifier = Modifier
             .clickable {
                 onClick(data, type)
+            }
+            .drawBehind {
+                val isFirstRow = index <= 3
+                val isLastRow = index >= 12
+                val isLastColumn = index % 4 == 3
+                drawLine(
+                    color = Color.LightGray,
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                    strokeWidth = if (isFirstRow) 2.dp.toPx() else {
+                        1.dp.toPx()
+                    }
+                )
+                if (!isLastColumn) {
+                    drawLine(
+                        color = Color.LightGray,
+                        start = Offset(size.width, 0f),
+                        end = Offset(size.width, size.height),
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
+
+                if (isLastRow) {
+                    drawLine(
+                        color = Color.LightGray,
+                        start = Offset(size.width, size.height),
+                        end = Offset(0f, size.height),
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
+
             }
             .padding(top = 16.dp, bottom = 16.dp)
     )
@@ -237,7 +272,7 @@ fun MonthlyRecordTotal(label: String, modifier: Modifier) {
 fun MonthlyInfo() {
     Row(
         modifier = Modifier
-            .background(color = ComposePlanTheme.colors.primaryVariant)
+            .background(color = PlanTheme.colors.bottomBar)
             .fillMaxWidth()
             .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
