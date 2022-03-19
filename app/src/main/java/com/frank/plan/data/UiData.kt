@@ -1,5 +1,6 @@
 package com.frank.plan.data
 
+import android.content.Context
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.DrawableRes
@@ -9,6 +10,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+
+const val TAG = "UiData"
 
 data class ItemTabUIData(
     val name: String,
@@ -50,9 +57,21 @@ class PlanModel : ViewModel() {
 
     // 添加页面中的数字
     var addString: String by mutableStateOf("0.00")
+
+    fun addBill(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            BillDataBase.getDatabase(context).billDao()
+                .addBill(Bill(type = targetAddType, value = addString.toDouble()))
+        }
+    }
+
+    fun getAll(context: Context): Flow<List<Bill>> {
+        return BillDataBase.getDatabase(context).billDao().getAllBill()
+    }
 }
 
-fun inputCallBack(content: String, type: Int, viewModel: PlanModel) {
+fun inputCallBack(content: String, type: Int, viewModel: PlanModel, context: Context) {
+
     when (type) {
         0 -> {
             viewModel.addString =
@@ -62,6 +81,30 @@ fun inputCallBack(content: String, type: Int, viewModel: PlanModel) {
                     )
                 ) content else viewModel.addString + content
         }
-        1 -> Log.d("InputCallBack", "content:$content,type:$type")
+        1 -> {
+            when (content) {
+                "删除" -> {
+                    viewModel.addString = viewModel.addString.let {
+                        if (it.isNotEmpty()) it.substring(0, it.length - 1) else "0.00"
+                    }
+                }
+                "完成" -> {
+                    viewModel.addBill(context)
+                    Log.d(TAG, "inputCallBack: -->$content")
+                }
+                "今天" -> {
+                    viewModel.viewModelScope.launch {
+                        viewModel.getAll(context).collect() {
+                            Log.d(TAG, "inputCallBack: --->${it.size}")
+                        }
+                    }
+                    Log.d(TAG, "inputCallBack: -->$content")
+                }
+                else -> {
+                    Log.d(TAG, "inputCallBack: -->do nothing")
+                }
+            }
+            Log.d("InputCallBack", "content:$content,type:$type")
+        }
     }
 }
