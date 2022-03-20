@@ -14,6 +14,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -29,15 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.frank.plan.R
-import com.frank.plan.data.ItemTabUIData
-import com.frank.plan.data.PlanModel
-import com.frank.plan.data.generatedInputData
-import com.frank.plan.data.inputCallBack
+import com.frank.plan.data.*
 import com.frank.plan.ui.theme.PlanTheme
 
-@Preview(showBackground = true)
 @Composable
-fun DayTotalInfo() {
+fun DayTotalInfo(bill: Bill) {
     Column {
         Row(
             modifier = Modifier
@@ -45,7 +42,7 @@ fun DayTotalInfo() {
                 .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(text = "02月08日 星期二", color = Color.Gray, fontSize = 10.sp)
+            Text(text = bill.time.toString(), color = Color.Gray, fontSize = 10.sp)
             Text(
                 text = stringResource(id = R.string.label_out_put, 20.23.toString()),
                 color = Color.Gray,
@@ -58,7 +55,7 @@ fun DayTotalInfo() {
 
 
 @Composable
-fun ItemBill(showDivider: Boolean) {
+fun ItemBill(showDivider: Boolean, itemData: Bill) {
     Column {
         Row(
             modifier = Modifier
@@ -79,7 +76,7 @@ fun ItemBill(showDivider: Boolean) {
 
                 ) {
                 Text(text = "餐饮")
-                Text(text = "-12.3")
+                Text(text = itemData.value.toString())
             }
         }
         if (showDivider) {
@@ -94,11 +91,16 @@ fun ItemBill(showDivider: Boolean) {
 
 
 @Composable
-fun DayBill(count: Int) {
-    DayTotalInfo()
-//    val count = Random.nextInt(1, 10)
-    for (i in 1..count) {
-        ItemBill(i != count)
+fun DayBill() {
+    val planModel: PlanModel = viewModel()
+    val context = LocalContext.current
+    val value = planModel.getAll(context).collectAsState(initial = null).value
+    // TODO How to use LazyColumn for this
+    if (value != null && value.isNotEmpty()) {
+        DayTotalInfo(value[0])
+        for ((index, item) in value.withIndex()) {
+            ItemBill(index != value.size - 1, item)
+        }
     }
 }
 
