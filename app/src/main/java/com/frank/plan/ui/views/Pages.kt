@@ -55,7 +55,7 @@ fun HistoryList() {
         LazyColumn {
             var count = 1
             items(5) {
-                DayBill(count)
+                DayBill()
                 count++
             }
         }
