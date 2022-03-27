@@ -14,7 +14,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -29,12 +28,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.frank.plan.R
 import com.frank.plan.data.*
 import com.frank.plan.ui.theme.PlanTheme
 
 @Composable
-fun DayTotalInfo(bill: Bill) {
+fun DayTotalInfo(dayBill: DayBill) {
     Column {
         Row(
             modifier = Modifier
@@ -42,9 +42,9 @@ fun DayTotalInfo(bill: Bill) {
                 .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(text = bill.time.toString(), color = Color.Gray, fontSize = 10.sp)
+            Text(text = dayBill.day.toString(), color = Color.Gray, fontSize = 10.sp)
             Text(
-                text = stringResource(id = R.string.label_out_put, 20.23.toString()),
+                text = stringResource(id = R.string.label_out_put, dayBill.totalMoney.toString()),
                 color = Color.Gray,
                 fontSize = 10.sp
             )
@@ -91,16 +91,11 @@ fun ItemBill(showDivider: Boolean, itemData: Bill) {
 
 
 @Composable
-fun DayBill() {
-    val planModel: PlanModel = viewModel()
-    val context = LocalContext.current
-    val value = planModel.getAll(context).collectAsState(initial = null).value
-    // TODO How to use LazyColumn for this
-    if (value != null && value.isNotEmpty()) {
-        DayTotalInfo(value[0])
-        for ((index, item) in value.withIndex()) {
-            ItemBill(index != value.size - 1, item)
-        }
+fun DayBill(dayBill: DayBill) {
+    DayTotalInfo(dayBill)
+    val bills = dayBill.bills
+    for ((index, item) in dayBill.bills.withIndex()) {
+        ItemBill(index != bills.size - 1, item)
     }
 }
 
@@ -161,22 +156,21 @@ fun GridTest(modifier: Modifier) {
 
 @ExperimentalFoundationApi
 @Composable
-fun AddView() {
+fun AddView(navController: NavHostController) {
     val viewModel: PlanModel = viewModel()
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "记一笔", fontSize = 30.sp, fontWeight = FontWeight.W500)
         GridTest(modifier = Modifier.weight(1f))
         if (viewModel.targetAddType != -1) {
-            InfoInput()
+            InfoInput(navController = navController)
         }
     }
 }
 
 // 输入数据界面
 @OptIn(ExperimentalFoundationApi::class)
-@Preview(showBackground = true, name = "InfoInput")
 @Composable
-fun InfoInput(modifier: Modifier = Modifier) {
+fun InfoInput(modifier: Modifier = Modifier, navController: NavHostController) {
     val generatedInputData = generatedInputData()
     val planModel: PlanModel = viewModel()
     val context = LocalContext.current.applicationContext
@@ -190,7 +184,7 @@ fun InfoInput(modifier: Modifier = Modifier) {
         ) {
             itemsIndexed(generatedInputData, spans = null) { index, it ->
                 InfoInputItem(index, it.content, it.type) { content, type ->
-                    inputCallBack(content, type, planModel, context)
+                    inputCallBack(content, type, planModel, context, navController)
                 }
             }
         }

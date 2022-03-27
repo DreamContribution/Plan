@@ -11,9 +11,13 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
+import com.frank.plan.ui.views.History
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.util.*
 
 const val TAG = "UiData"
 
@@ -55,6 +59,14 @@ class PlanModel : ViewModel() {
     // 添加页面中的类型标记
     var targetAddType: Int by mutableStateOf(-1)
 
+    // 当前选择的年份
+    var selectedYear: String by mutableStateOf(Calendar.getInstance().get(Calendar.YEAR).toString())
+
+    // 当前选择的月份
+    var selectedMonth: String by mutableStateOf(
+        (Calendar.getInstance().get(Calendar.MONTH) + 1).toString()
+    )
+
     // 添加页面中的数字
     var addString: String by mutableStateOf("0.00")
 
@@ -65,12 +77,43 @@ class PlanModel : ViewModel() {
         }
     }
 
-    fun getAll(context: Context): Flow<List<Bill>> {
-        return BillDataBase.getDatabase(context).billDao().getAllBill()
+    /**
+     * 通过当前选择的年-月，获取数据
+     */
+    fun getBillByMonth(
+        context: Context
+    ): Flow<List<DayBill>> {
+        return BillDataBase.getDatabase(context).billDao()
+            .getBillsByMonth("2022-03-01", "2022-03-31").map {
+                val listOfDayBill = mutableListOf<DayBill>()
+                var lastDate = ""
+                it.forEach { itemBill ->
+                    if (TextUtils.equals(itemBill.time.toString(), lastDate)) {
+                        listOfDayBill.last().also { itemDayBill ->
+                            itemDayBill.totalMoney += itemBill.value
+                            itemDayBill.bills.add(itemBill)
+                        }
+                    } else {
+                        val newBill =
+                            DayBill(day = itemBill.time, totalMoney = itemBill.value).also { new ->
+                                new.bills.add(itemBill)
+                            }
+                        listOfDayBill.add(newBill)
+                        lastDate = itemBill.time.toString()
+                    }
+                }
+                listOfDayBill
+            }
     }
 }
 
-fun inputCallBack(content: String, type: Int, viewModel: PlanModel, context: Context) {
+fun inputCallBack(
+    content: String,
+    type: Int,
+    viewModel: PlanModel,
+    context: Context,
+    nav: NavHostController
+) {
 
     when (type) {
         0 -> {
@@ -90,15 +133,10 @@ fun inputCallBack(content: String, type: Int, viewModel: PlanModel, context: Con
                 }
                 "完成" -> {
                     viewModel.addBill(context)
-                    Log.d(TAG, "inputCallBack: -->$content")
+                    nav.navigate(History)
                 }
                 "今天" -> {
-                    viewModel.viewModelScope.launch {
-                        viewModel.getAll(context).collect() {
-                            Log.d(TAG, "inputCallBack: --->${it.size}")
-                        }
-                    }
-                    Log.d(TAG, "inputCallBack: -->$content")
+
                 }
                 else -> {
                     Log.d(TAG, "inputCallBack: -->do nothing")
