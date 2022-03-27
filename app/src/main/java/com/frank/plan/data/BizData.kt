@@ -4,42 +4,23 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.room.*
-import com.frank.plan.MainActivity
 import kotlinx.coroutines.flow.Flow
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Entity
 data class Bill(
     @PrimaryKey(autoGenerate = true) val id: Long? = null,
     val type: Int,
     val value: Double,
-    val time: LocalDateTime = LocalDateTime.now()// android min 26
+    val time: LocalDate = LocalDate.now()// android min 26
 )
 
 data class DayBill(
-    val day: Date,
-    val totalMoney: Double,
-    val bills: List<Bill>
+    val day: LocalDate,
+    var totalMoney: Double,
+    val bills: MutableList<Bill> = mutableListOf()
 )
-
-class Converters {
-    @TypeConverter
-    fun fromTimestamp(value: Long?): LocalDateTime? {
-        return value?.let {
-            return Instant.ofEpochMilli(value).atZone(ZoneOffset.ofHours(8)).toLocalDateTime()
-        }
-    }
-
-    @TypeConverter
-    fun dateToTimestamp(date: LocalDateTime?): Long? {
-        return date?.toInstant(ZoneOffset.ofHours(8))?.toEpochMilli()
-
-    }
-}
-
 
 @Entity
 data class BillType(
@@ -48,6 +29,18 @@ data class BillType(
     val icon: String,
     val weight: Int
 )
+
+class Converters {
+    @TypeConverter
+    fun fromTimestamp(value: String?): LocalDate? {
+        return LocalDate.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    }
+
+    @TypeConverter
+    fun dateToTimestamp(date: LocalDate?): String? {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(date)
+    }
+}
 
 
 @Dao
@@ -59,8 +52,8 @@ interface BillDao {
     @Query("SELECT * FROM Bill ORDER BY id DESC")
     fun getAllBill(): Flow<List<Bill>>
 
-//    // TODO: SQL
-//    fun getBillsByMonth(): List<DayBill>
+    @Query("SELECT * FROM Bill WHERE time>=:startDate and time <=:endDate ORDER BY id DESC")
+    fun getBillsByMonth(startDate: String, endDate: String): Flow<List<Bill>>
 //
 //    @Query("SELECT * FROM BillType")
 //    fun getAllBillType(): List<BillType>
@@ -100,18 +93,14 @@ abstract class BillDataBase : RoomDatabase() {
 /**
  * test of data
  */
-suspend fun dataBaseTest(context: Application) {
+fun dataBaseTest(context: Application): Flow<List<Bill>> {
     val db =
         Room.databaseBuilder(context, BillDataBase::class.java, "bill")
             .build()
 
     val billDao = db.billDao()
 
-    val itemBill = Bill(value = 20.0, type = 1)
-    Log.d(MainActivity.TAG, "onCreate: itemBill:$itemBill")
-    billDao.addBill(Bill(value = 20.0, type = 1))
-    val allBill = billDao.getAllBill().collect {
-        it[0]
-    }
-    Log.d(MainActivity.TAG, "onCreate: allBill:$allBill")
+    val billsByMonth = billDao.getBillsByMonth("2022-03-01", "2022-03-31")
+    Log.d(TAG, "dataBaseTest: $billsByMonth")
+    return billsByMonth
 }
