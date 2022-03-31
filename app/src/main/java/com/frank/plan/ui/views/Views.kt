@@ -2,11 +2,13 @@ package com.frank.plan.ui.views
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
@@ -14,13 +16,15 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +60,9 @@ fun DayTotalInfo(dayBill: DayBill) {
 
 @Composable
 fun ItemBill(showDivider: Boolean, itemData: Bill) {
+    val itemUiInfo by remember {
+        mutableStateOf(getItemTabUIDataById(itemData.type))
+    }
     Column {
         Row(
             modifier = Modifier
@@ -65,17 +72,22 @@ fun ItemBill(showDivider: Boolean, itemData: Bill) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                modifier = Modifier.size(30.dp),
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                modifier = Modifier.size(20.dp),
+                imageVector = itemUiInfo.icon!!,
                 contentDescription = "type icon"
             )
+//            Icon(
+//                modifier = Modifier.size(30.dp),
+//                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+//                contentDescription = "type icon"
+//            )
             Spacer(modifier = Modifier.width(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
 
                 ) {
-                Text(text = "餐饮")
+                Text(text = itemUiInfo.name)
                 Text(text = itemData.value.toString())
             }
         }
@@ -83,7 +95,7 @@ fun ItemBill(showDivider: Boolean, itemData: Bill) {
             Divider(
                 color = Color.Gray,
                 thickness = 0.5.dp,
-                modifier = Modifier.padding(start = 54.dp)
+                modifier = Modifier.padding(start = 44.dp)
             )
         }
     }
@@ -101,22 +113,22 @@ fun DayBill(dayBill: DayBill) {
 
 
 @Composable
-fun ItemType(
-    itemUiUIData: ItemTabUIData = ItemTabUIData(
-        "餐饮",
-        iconResource = painterResource(id = R.drawable.ic_launcher_foreground)
-    ), viewModel: PlanModel, index: Int
-) {
+fun ItemType(itemUiUIData: ItemTabUIData, viewModel: PlanModel, index: Int) {
     Column(
         modifier = Modifier
+            .padding(vertical = 2.dp)
+            .border(width = 1.dp, color = Color.Transparent, shape = RoundedCornerShape(2.dp))
             .clickable {
                 viewModel.targetAddType = index
             },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val iconModifier = Modifier.size(40.dp)
+        val iconModifier = Modifier.size(30.dp)
         val contentDesc = "test type"
-        Surface(modifier = Modifier.background(Color.LightGray)) {
+        Surface(
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+        ) {
             if (itemUiUIData.icon != null) {
                 Icon(
                     imageVector = itemUiUIData.icon!!,
@@ -141,15 +153,15 @@ fun ItemType(
 
 @ExperimentalFoundationApi
 @Composable
-fun GridTest(modifier: Modifier) {
+fun RecordTypeGridList(modifier: Modifier) {
     val planModel: PlanModel = viewModel()
     LazyVerticalGrid(
         cells = GridCells.Fixed(4),
         modifier = modifier
     ) {
-
-        items(100) {
-            ItemType(viewModel = planModel, index = it)
+        items(6) {
+            val itemUiUIData by mutableStateOf(getItemTabUIDataById(it + 1))
+            ItemType(itemUiUIData = itemUiUIData, viewModel = planModel, index = it)
         }
     }
 }
@@ -160,7 +172,7 @@ fun AddView(navController: NavHostController) {
     val viewModel: PlanModel = viewModel()
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = "记一笔", fontSize = 30.sp, fontWeight = FontWeight.W500)
-        GridTest(modifier = Modifier.weight(1f))
+        RecordTypeGridList(modifier = Modifier.weight(1f))
         if (viewModel.targetAddType != -1) {
             InfoInput(navController = navController)
         }

@@ -4,6 +4,8 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.DrawableRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,7 +14,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.frank.plan.ui.views.History
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -73,7 +74,7 @@ class PlanModel : ViewModel() {
     fun addBill(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             BillDataBase.getDatabase(context).billDao()
-                .addBill(Bill(type = targetAddType, value = addString.toDouble()))
+                .addBill(Bill(type = targetAddType + 1, value = addString.toDouble()))
         }
     }
 
@@ -133,7 +134,7 @@ fun inputCallBack(
                 }
                 "完成" -> {
                     viewModel.addBill(context)
-                    nav.navigate(History)
+                    nav.popBackStack()
                 }
                 "今天" -> {
 
@@ -145,4 +146,15 @@ fun inputCallBack(
             Log.d("InputCallBack", "content:$content,type:$type")
         }
     }
+}
+
+fun getItemTabUIDataById(id: Int): ItemTabUIData {
+    return when (id) {
+        1 -> ItemTabUIData(name = "餐饮", icon = Icons.Default.Create)
+        2 -> ItemTabUIData(name = "购物", icon = Icons.Default.AccountBox)
+        3 -> ItemTabUIData(name = "交通", icon = Icons.Default.Face)
+        4 -> ItemTabUIData(name = "日用", icon = Icons.Default.AccountCircle)
+        else -> ItemTabUIData(name = "其他", icon = Icons.Default.Star)
+    }
+
 }
