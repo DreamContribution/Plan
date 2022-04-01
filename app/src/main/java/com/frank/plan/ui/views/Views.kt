@@ -1,18 +1,13 @@
 package com.frank.plan.ui.views
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import android.widget.CalendarView
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
@@ -28,11 +23,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.frank.plan.R
 import com.frank.plan.data.*
 import com.frank.plan.ui.theme.PlanTheme
+import java.util.*
 
 @Composable
 fun DayTotalInfo(dayBill: DayBill) {
@@ -55,12 +53,21 @@ fun DayTotalInfo(dayBill: DayBill) {
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ItemBill(showDivider: Boolean, itemData: Bill) {
     val itemUiInfo by remember {
         mutableStateOf(getItemTabUIDataById(itemData.type))
     }
-    Column {
+
+    val viewModel: PlanModel = viewModel()
+    var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+    val context = LocalContext.current
+    Column(modifier = Modifier.combinedClickable(onLongClick = {
+        showDeleteDialog = true
+    }, onClick = {})) {
         Row(
             modifier = Modifier
                 .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 10.dp)
@@ -89,6 +96,15 @@ fun ItemBill(showDivider: Boolean, itemData: Bill) {
                 thickness = 0.5.dp,
                 modifier = Modifier.padding(start = 44.dp)
             )
+        }
+
+        if (showDeleteDialog) {
+            DeleteDialog(onConfirm = {
+                viewModel.deleteItemBill(context, itemData)
+                showDeleteDialog = false
+            }) {
+                showDeleteDialog = false
+            }
         }
     }
 }
@@ -225,7 +241,6 @@ fun InfoInputItem(index: Int, data: String, type: Int, onClick: (String, Int) ->
                         strokeWidth = 1.dp.toPx()
                     )
                 }
-
                 if (isLastRow) {
                     drawLine(
                         color = Color.LightGray,
@@ -241,22 +256,22 @@ fun InfoInputItem(index: Int, data: String, type: Int, onClick: (String, Int) ->
 }
 
 @Composable
-fun MonthSelectButton() {
+fun MonthSelectButton(onClick: () -> Unit) {
     val planModel: PlanModel = viewModel()
-    Row {
-        Column {
-            Text(text = planModel.selectedYear, fontSize = 15.sp, fontWeight = FontWeight.W100)
-            Row {
-                Text(text = planModel.selectedMonth, fontSize = 22.sp)
-                Text(text = "月", fontSize = 18.sp, modifier = Modifier.align(Alignment.Bottom))
-                Icon(
-                    Icons.Default.ArrowDropDown,
-                    contentDescription = "content",
-                    modifier = Modifier
-                        .padding(0.dp)
-                        .align(Alignment.Bottom)
-                )
-            }
+    Column(modifier = Modifier.clickable {
+        onClick()
+    }) {
+        Text(text = planModel.selectedYear, fontSize = 15.sp, fontWeight = FontWeight.W100)
+        Row {
+            Text(text = planModel.selectedMonth, fontSize = 22.sp)
+            Text(text = "月", fontSize = 18.sp, modifier = Modifier.align(Alignment.Bottom))
+            Icon(
+                Icons.Default.ArrowDropDown,
+                contentDescription = "content",
+                modifier = Modifier
+                    .padding(0.dp)
+                    .align(Alignment.Bottom)
+            )
         }
     }
 }
@@ -282,6 +297,9 @@ fun MonthlyRecordTotal(label: String, modifier: Modifier) {
 
 @Composable
 fun MonthlyInfo() {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
     Row(
         modifier = Modifier
             .background(color = PlanTheme.colors.bottomBar)
@@ -289,10 +307,15 @@ fun MonthlyInfo() {
             .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        MonthSelectButton()
+        MonthSelectButton { showDialog = true }
         Spacer(modifier = Modifier.width(30.dp))
         MonthlyRecordTotal(label = "收入", modifier = Modifier.weight(1f))
         MonthlyRecordTotal(label = "支出", modifier = Modifier.weight(1f))
+        if (showDialog) {
+            DateSelectorDialog {
+                showDialog = false
+            }
+        }
     }
 }
 
@@ -305,6 +328,56 @@ fun InputMoney() {
     ) {
         Text("0")
         Spacer(modifier = Modifier.width(10.dp))
+    }
+}
+
+@Composable
+fun DateSelectorDialog(onDismiss: () -> Unit) {
+    val viewModel: PlanModel = viewModel()
+    Dialog(onDismissRequest = onDismiss) {
+        AndroidView(
+            factory = {
+                CalendarView(it).apply {
+                    val initDate = Calendar.getInstance().apply {
+                        set(Calendar.YEAR, viewModel.selectedYear.toInt())
+                        set(Calendar.MONTH, viewModel.selectedMonth.toInt() - 1)
+                    }
+                    date = initDate.timeInMillis
+                }
+            },
+            Modifier
+                .wrapContentSize()
+                .background(color = PlanTheme.colors.bottomBar),
+            update = { view ->
+                view.setOnDateChangeListener { _, year, mon, _ ->
+                    viewModel.selectedMonth = String.format("%02d", mon + 1)
+                    viewModel.selectedYear = year.toString()
+                    onDismiss()
+                }
+            })
+    }
+}
+
+@Composable
+fun DeleteDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
+    Dialog(onDismissRequest = onCancel) {
+        Column(
+            modifier = Modifier
+                .background(color = Color.White)
+                .padding(40.dp)
+        ) {
+            Text(text = "Need Delete?")
+            Spacer(modifier = Modifier.padding(vertical = 10.dp))
+            Row {
+                Button(onClick = onConfirm) {
+                    Text(text = "Confirm")
+                }
+                Spacer(modifier = Modifier.padding(horizontal = 10.dp))
+                Button(onClick = onCancel) {
+                    Text(text = "Cancel")
+                }
+            }
+        }
     }
 }
 

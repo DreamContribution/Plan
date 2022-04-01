@@ -62,8 +62,8 @@ interface BillDao {
     @Query("SELECT SUM(value) AS input FROM Bill WHERE time>=:startDate and time <=:endDate")
     fun getFullInputByMonth(startDate: String, endDate: String): Flow<FullInputPerMonth>
 
-//    @Delete
-//    fun deleteBillType(targetType: BillType)
+    @Delete
+    fun deleteBill(targetType: Bill)
 
 }
 

@@ -37,9 +37,9 @@ data class InputData(
 
 fun generatedInputData(): List<InputData> {
     val inputContents: ArrayList<InputData> = arrayListOf()
+    inputContents.add(InputData("7", 0))
     inputContents.add(InputData("8", 0))
     inputContents.add(InputData("9", 0))
-    inputContents.add(InputData("7", 0))
     inputContents.add(InputData("今天", 1))
     inputContents.add(InputData("4", 0))
     inputContents.add(InputData("5", 0))
@@ -115,6 +115,12 @@ class PlanModel : ViewModel() {
                 }
                 listOfDayBill
             }
+    }
+
+    fun deleteItemBill(context: Context, itemBill: Bill) {
+        viewModelScope.launch(Dispatchers.IO) {
+            BillDataBase.getDatabase(context = context).billDao().deleteBill(itemBill)
+        }
     }
 }
 
