@@ -65,7 +65,7 @@ class PlanModel : ViewModel() {
 
     // 当前选择的月份
     var selectedMonth: String by mutableStateOf(
-        (Calendar.getInstance().get(Calendar.MONTH) + 1).toString()
+        String.format("%02d", Calendar.getInstance().get(Calendar.MONTH) + 1)
     )
 
     // 添加页面中的数字
@@ -78,6 +78,15 @@ class PlanModel : ViewModel() {
         }
     }
 
+    fun getFullInputByMonth(context: Context): Flow<FullInputPerMonth> {
+        Log.d(TAG, "getFullInputByMonth: $selectedYear-$selectedMonth")
+        return BillDataBase.getDatabase(context = context).billDao()
+            .getFullInputByMonth(
+                "$selectedYear-$selectedMonth-01",
+                "$selectedYear-$selectedMonth-31"
+            )
+    }
+
     /**
      * 通过当前选择的年-月，获取数据
      */
@@ -85,7 +94,8 @@ class PlanModel : ViewModel() {
         context: Context
     ): Flow<List<DayBill>> {
         return BillDataBase.getDatabase(context).billDao()
-            .getBillsByMonth("2022-03-01", "2022-03-31").map {
+            .getBillsByMonth("$selectedYear-$selectedMonth-01", "$selectedYear-$selectedMonth-31")
+            .map {
                 val listOfDayBill = mutableListOf<DayBill>()
                 var lastDate = ""
                 it.forEach { itemBill ->

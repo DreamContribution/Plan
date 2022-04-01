@@ -22,6 +22,10 @@ data class DayBill(
     val bills: MutableList<Bill> = mutableListOf()
 )
 
+data class FullInputPerMonth(
+    val input: Double
+)
+
 @Entity
 data class BillType(
     @PrimaryKey val id: Int,
@@ -54,13 +58,10 @@ interface BillDao {
 
     @Query("SELECT * FROM Bill WHERE time>=:startDate and time <=:endDate ORDER BY id DESC")
     fun getBillsByMonth(startDate: String, endDate: String): Flow<List<Bill>>
-//
-//    @Query("SELECT * FROM BillType")
-//    fun getAllBillType(): List<BillType>
-//
-//    @Insert
-//    fun addBillType(vararg types: BillType)
-//
+
+    @Query("SELECT SUM(value) AS input FROM Bill WHERE time>=:startDate and time <=:endDate")
+    fun getFullInputByMonth(startDate: String, endDate: String): Flow<FullInputPerMonth>
+
 //    @Delete
 //    fun deleteBillType(targetType: BillType)
 

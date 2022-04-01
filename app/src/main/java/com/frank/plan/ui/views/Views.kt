@@ -15,10 +15,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -76,11 +73,6 @@ fun ItemBill(showDivider: Boolean, itemData: Bill) {
                 imageVector = itemUiInfo.icon!!,
                 contentDescription = "type icon"
             )
-//            Icon(
-//                modifier = Modifier.size(30.dp),
-//                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-//                contentDescription = "type icon"
-//            )
             Spacer(modifier = Modifier.width(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -250,11 +242,12 @@ fun InfoInputItem(index: Int, data: String, type: Int, onClick: (String, Int) ->
 
 @Composable
 fun MonthSelectButton() {
+    val planModel: PlanModel = viewModel()
     Row {
         Column {
-            Text(text = "2022年", fontSize = 15.sp, fontWeight = FontWeight.W100)
+            Text(text = planModel.selectedYear, fontSize = 15.sp, fontWeight = FontWeight.W100)
             Row {
-                Text(text = "02", fontSize = 22.sp)
+                Text(text = planModel.selectedMonth, fontSize = 22.sp)
                 Text(text = "月", fontSize = 18.sp, modifier = Modifier.align(Alignment.Bottom))
                 Icon(
                     Icons.Default.ArrowDropDown,
@@ -271,9 +264,18 @@ fun MonthSelectButton() {
 
 @Composable
 fun MonthlyRecordTotal(label: String, modifier: Modifier) {
+    val planModel: PlanModel = viewModel()
+    val context = LocalContext.current
+    val monthlyBill = planModel.getFullInputByMonth(context)
+        .collectAsState(initial = FullInputPerMonth(0.0)).value
+    val num = if (label == "收入") {
+        0.0.toString()
+    } else {
+        monthlyBill.input.toString()
+    }
     Column(modifier = modifier) {
         Text(text = label, fontSize = 15.sp, fontWeight = FontWeight.W100)
-        Text(text = "100.00", fontSize = 22.sp, fontWeight = FontWeight.W200)
+        Text(text = num, fontSize = 22.sp, fontWeight = FontWeight.W200)
     }
 }
 
