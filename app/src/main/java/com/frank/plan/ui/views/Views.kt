@@ -1,5 +1,6 @@
 package com.frank.plan.ui.views
 
+import android.util.Log
 import android.widget.CalendarView
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,14 +43,18 @@ fun DayTotalInfo(dayBill: DayBill) {
                 .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(text = dayBill.day.toString(), color = Color.Gray, fontSize = 10.sp)
+            Text(
+                text = dayBill.day.toString(),
+                color = PlanTheme.colors.textColor,
+                fontSize = 10.sp
+            )
             Text(
                 text = stringResource(id = R.string.label_out_put, dayBill.totalMoney.toString()),
-                color = Color.Gray,
+                color = PlanTheme.colors.textColor,
                 fontSize = 10.sp
             )
         }
-        Divider(color = Color.Gray, thickness = 0.5.dp)
+        Divider(color = PlanTheme.colors.separate, thickness = 0.5.dp)
     }
 }
 
@@ -65,46 +71,46 @@ fun ItemBill(showDivider: Boolean, itemData: Bill) {
         mutableStateOf(false)
     }
     val context = LocalContext.current
-    Column(modifier = Modifier.combinedClickable(onLongClick = {
-        showDeleteDialog = true
-    }, onClick = {})) {
-        Row(
-            modifier = Modifier
-                .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 10.dp)
-                .fillMaxWidth()
-                .background(Color.Transparent),
-            verticalAlignment = Alignment.CenterVertically
+    Row(
+        modifier = Modifier
+            .combinedClickable(onLongClick = {
+                showDeleteDialog = true
+            }, onClick = {})
+            .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 10.dp)
+            .fillMaxWidth()
+            .background(Color.Transparent),
+        verticalAlignment = Alignment.CenterVertically,
+
         ) {
-            Icon(
-                modifier = Modifier.size(20.dp),
-                imageVector = itemUiInfo.icon!!,
-                contentDescription = "type icon"
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-
-                ) {
-                Text(text = itemUiInfo.name)
-                Text(text = itemData.value.toString())
-            }
+        Icon(
+            modifier = Modifier.size(20.dp),
+            imageVector = itemUiInfo.icon!!,
+            contentDescription = "type icon",
+            tint = PlanTheme.colors.iconTint
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = itemUiInfo.name, color = PlanTheme.colors.textColor)
+            Text(text = itemData.value.toString(), color = PlanTheme.colors.textColor)
         }
-        if (showDivider) {
-            Divider(
-                color = Color.Gray,
-                thickness = 0.5.dp,
-                modifier = Modifier.padding(start = 44.dp)
-            )
-        }
+    }
+    if (showDivider) {
+        Divider(
+            color = PlanTheme.colors.separate,
+            thickness = 0.5.dp,
+            modifier = Modifier.padding(start = 44.dp)
+        )
+    }
 
-        if (showDeleteDialog) {
-            DeleteDialog(onConfirm = {
-                viewModel.deleteItemBill(context, itemData)
-                showDeleteDialog = false
-            }) {
-                showDeleteDialog = false
-            }
+    if (showDeleteDialog) {
+        DeleteDialog(onConfirm = {
+            viewModel.deleteItemBill(context, itemData)
+            showDeleteDialog = false
+        }) {
+            showDeleteDialog = false
         }
     }
 }
@@ -142,14 +148,14 @@ fun ItemType(itemUiUIData: ItemTabUIData, viewModel: PlanModel, index: Int) {
                     imageVector = itemUiUIData.icon!!,
                     modifier = iconModifier,
                     contentDescription = contentDesc,
-                    tint = if (viewModel.targetAddType == index) Color.Red else Color.Black
+                    tint = if (viewModel.targetAddType == index) PlanTheme.colors.iconTintSelected else PlanTheme.colors.iconTint
                 )
             } else if (itemUiUIData.iconResource != null) {
                 Icon(
                     painter = itemUiUIData.iconResource!!,
                     modifier = iconModifier,
                     contentDescription = contentDesc,
-                    tint = if (viewModel.targetAddType == index) Color.Red else Color.Black
+                    tint = if (viewModel.targetAddType == index) PlanTheme.colors.iconTintSelected else PlanTheme.colors.iconTint
                 )
             }
         }
@@ -190,7 +196,7 @@ fun AddView(navController: NavHostController) {
 // 输入数据界面
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun InfoInput(modifier: Modifier = Modifier, navController: NavHostController) {
+fun InfoInput(navController: NavHostController) {
     val generatedInputData = generatedInputData()
     val planModel: PlanModel = viewModel()
     val context = LocalContext.current.applicationContext
@@ -214,6 +220,7 @@ fun InfoInput(modifier: Modifier = Modifier, navController: NavHostController) {
 
 @Composable
 fun InfoInputItem(index: Int, data: String, type: Int, onClick: (String, Int) -> Unit) {
+    val speLineColor = PlanTheme.colors.iconTintSelected
     Text(
         text = data,
         textAlign = TextAlign.Center,
@@ -226,7 +233,7 @@ fun InfoInputItem(index: Int, data: String, type: Int, onClick: (String, Int) ->
                 val isLastRow = index >= 12
                 val isLastColumn = index % 4 == 3
                 drawLine(
-                    color = Color.LightGray,
+                    color = speLineColor,
                     start = Offset(0f, 0f),
                     end = Offset(size.width, 0f),
                     strokeWidth = if (isFirstRow) 2.dp.toPx() else {
@@ -235,7 +242,7 @@ fun InfoInputItem(index: Int, data: String, type: Int, onClick: (String, Int) ->
                 )
                 if (!isLastColumn) {
                     drawLine(
-                        color = Color.LightGray,
+                        color = speLineColor,
                         start = Offset(size.width, 0f),
                         end = Offset(size.width, size.height),
                         strokeWidth = 1.dp.toPx()
@@ -261,16 +268,31 @@ fun MonthSelectButton(onClick: () -> Unit) {
     Column(modifier = Modifier.clickable {
         onClick()
     }) {
-        Text(text = planModel.selectedYear, fontSize = 15.sp, fontWeight = FontWeight.W100)
+        Text(
+            text = planModel.selectedYear,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.W200,
+            color = PlanTheme.colors.titleTextColor
+        )
         Row {
-            Text(text = planModel.selectedMonth, fontSize = 22.sp)
-            Text(text = "月", fontSize = 18.sp, modifier = Modifier.align(Alignment.Bottom))
+            Text(
+                text = planModel.selectedMonth,
+                fontSize = 22.sp,
+                color = PlanTheme.colors.titleTextColor
+            )
+            Text(
+                text = "月",
+                fontSize = 18.sp,
+                modifier = Modifier.align(Alignment.Bottom),
+                color = PlanTheme.colors.titleTextColor
+            )
             Icon(
                 Icons.Default.ArrowDropDown,
                 contentDescription = "content",
                 modifier = Modifier
                     .padding(0.dp)
-                    .align(Alignment.Bottom)
+                    .align(Alignment.Bottom),
+                tint = PlanTheme.colors.titleTextColor
             )
         }
     }
@@ -281,16 +303,26 @@ fun MonthSelectButton(onClick: () -> Unit) {
 fun MonthlyRecordTotal(label: String, modifier: Modifier) {
     val planModel: PlanModel = viewModel()
     val context = LocalContext.current
-    val monthlyBill = planModel.getFullInputByMonth(context)
-        .collectAsState(initial = FullInputPerMonth(0.0)).value
     val num = if (label == "收入") {
         0.0.toString()
     } else {
-        monthlyBill.input.toString()
+        Log.d(TAG, "MonthlyRecordTotal: -->$label")
+        planModel.getFullInputByMonth(context)
+            .collectAsState(initial = FullInputPerMonth(0.0)).value.input.toString()
     }
     Column(modifier = modifier) {
-        Text(text = label, fontSize = 15.sp, fontWeight = FontWeight.W100)
-        Text(text = num, fontSize = 22.sp, fontWeight = FontWeight.W200)
+        Text(
+            text = label,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.W200,
+            color = PlanTheme.colors.titleTextColor
+        )
+        Text(
+            text = num,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.W200,
+            color = PlanTheme.colors.titleTextColor
+        )
     }
 }
 
@@ -302,7 +334,7 @@ fun MonthlyInfo() {
     }
     Row(
         modifier = Modifier
-            .background(color = PlanTheme.colors.bottomBar)
+            .background(color = PlanTheme.colors.titleBg)
             .fillMaxWidth()
             .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -347,7 +379,7 @@ fun DateSelectorDialog(onDismiss: () -> Unit) {
             },
             Modifier
                 .wrapContentSize()
-                .background(color = PlanTheme.colors.bottomBar),
+                .background(color = PlanTheme.colors.titleBg),
             update = { view ->
                 view.setOnDateChangeListener { _, year, mon, _ ->
                     viewModel.selectedMonth = String.format("%02d", mon + 1)
@@ -363,7 +395,7 @@ fun DeleteDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
     Dialog(onDismissRequest = onCancel) {
         Column(
             modifier = Modifier
-                .background(color = Color.White)
+                .background(color = PlanTheme.colors.textColor)
                 .padding(40.dp)
         ) {
             Text(text = "Need Delete?")

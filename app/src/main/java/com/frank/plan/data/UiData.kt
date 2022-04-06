@@ -93,12 +93,14 @@ class PlanModel : ViewModel() {
     fun getBillByMonth(
         context: Context
     ): Flow<List<DayBill>> {
+        Log.d(TAG, "getBillByMonth: start--->")
         return BillDataBase.getDatabase(context).billDao()
             .getBillsByMonth("$selectedYear-$selectedMonth-01", "$selectedYear-$selectedMonth-31")
             .map {
                 val listOfDayBill = mutableListOf<DayBill>()
                 var lastDate = ""
                 it.forEach { itemBill ->
+                    Log.d(TAG, "getBillByMonth: -->${itemBill.id}")
                     if (TextUtils.equals(itemBill.time.toString(), lastDate)) {
                         listOfDayBill.last().also { itemDayBill ->
                             itemDayBill.totalMoney += itemBill.value

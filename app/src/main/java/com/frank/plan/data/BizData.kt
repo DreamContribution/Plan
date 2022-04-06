@@ -56,7 +56,7 @@ interface BillDao {
     @Query("SELECT * FROM Bill ORDER BY id DESC")
     fun getAllBill(): Flow<List<Bill>>
 
-    @Query("SELECT * FROM Bill WHERE time>=:startDate and time <=:endDate ORDER BY id DESC")
+    @Query("SELECT * FROM Bill WHERE time>=:startDate and time <=:endDate ORDER BY time DESC")
     fun getBillsByMonth(startDate: String, endDate: String): Flow<List<Bill>>
 
     @Query("SELECT SUM(value) AS input FROM Bill WHERE time>=:startDate and time <=:endDate")

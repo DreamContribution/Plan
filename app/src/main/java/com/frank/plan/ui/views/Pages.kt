@@ -1,9 +1,12 @@
 package com.frank.plan.ui.views
 
 import android.text.TextUtils
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,7 +20,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,11 +40,11 @@ const val History = "HistoryList"
 const val ADD = "Add"
 
 @Composable
-fun HistoryList() {
+fun HistoryList(changeTheme: () -> Unit) {
     val planModel: PlanModel = viewModel()
     val context = LocalContext.current
     val monthlyBill = planModel.getBillByMonth(context).collectAsState(initial = null).value
-
+    Log.d(TAG, "HistoryList: --->")
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -51,15 +53,23 @@ fun HistoryList() {
 
         Text(
             modifier = Modifier
-                .background(PlanTheme.colors.bottomBar)
+                .clickable {
+                    changeTheme()
+                }
+                .background(PlanTheme.colors.titleBg)
                 .fillMaxWidth(),
             text = "轻松记账",
             fontSize = 40.sp,
             fontWeight = FontWeight.W900,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = PlanTheme.colors.titleTextColor
         )
         MonthlyInfo()
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxHeight()
+                .background(PlanTheme.colors.mainBg)
+        ) {
             if (!monthlyBill.isNullOrEmpty()) {
                 items(monthlyBill) {
                     DayBill(it)
@@ -71,7 +81,7 @@ fun HistoryList() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MainView() {
+fun MainView(changeTheme: () -> Unit) {
     var show by remember {
         mutableStateOf(true)
     }
@@ -91,13 +101,17 @@ fun MainView() {
                 },
                 modifier = Modifier
                     .wrapContentSize(),
-                backgroundColor = Color.White
+                backgroundColor = PlanTheme.colors.mainBg
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Add",
+                    tint = PlanTheme.colors.textColor
+                )
             }
         }
     }) {
-        NavHostZone(navController = navController)
+        NavHostZone(navController = navController, changeTheme = changeTheme)
     }
 }
 
@@ -106,11 +120,12 @@ fun MainView() {
 @Composable
 fun NavHostZone(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    changeTheme: () -> Unit
 ) {
     NavHost(navController = navController, startDestination = History, modifier = modifier) {
         composable(History) {
-            HistoryList()
+            HistoryList(changeTheme)
         }
 
         composable(ADD) {
