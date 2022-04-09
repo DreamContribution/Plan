@@ -1,5 +1,6 @@
 package com.frank.plan.ui.views
 
+import android.content.Context
 import android.text.TextUtils
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -30,10 +31,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.frank.plan.data.Bill
+import com.frank.plan.data.DayBill
 import com.frank.plan.data.PlanModel
 import com.frank.plan.ui.theme.PlanTheme
-import kotlinx.coroutines.flow.Flow
 
 
 const val TAG = "HistoryList"
@@ -42,9 +42,14 @@ const val History = "HistoryList"
 const val ADD = "Add"
 
 @Composable
-fun HistoryList(changeTheme: () -> Unit) {
+fun HistoryList(
+    changeTheme: () -> Unit,
+    planModel: PlanModel = viewModel(),
+    context: Context = LocalContext.current
+) {
     Log.d(TAG, "HistoryList: view")
-
+    val listBill = planModel.getBillByMonth(context)
+    val data = listBill.collectAsState(initial = listOf())
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -64,27 +69,20 @@ fun HistoryList(changeTheme: () -> Unit) {
             color = PlanTheme.colors.titleTextColor
         )
         MonthlyInfo()
-        BillList()
+        BillList(data)
     }
 }
 
 @Composable
-private fun BillList(listBill: Flow<Array<Bill>>? = null) {
-    val planModel: PlanModel = viewModel()
-    val context = LocalContext.current
-    val listBill = planModel.getBillByMonth(context)
-    val data = listBill.collectAsState(initial = null).value
+private fun BillList(data: State<List<DayBill>>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxHeight()
             .background(PlanTheme.colors.mainBg)
     ) {
-        if (data != null) {
-            items(data) {
-                DayBill(it)
-            }
+        items(data.value) {
+            DayBill(it)
         }
-
     }
 }
 
@@ -120,7 +118,8 @@ fun MainView(changeTheme: () -> Unit) {
             }
         }
     }) {
-        NavHostZone(navController = navController, changeTheme = changeTheme)
+        HistoryList(changeTheme)
+//        NavHostZone(navController = navController, changeTheme = changeTheme)
     }
 }
 
