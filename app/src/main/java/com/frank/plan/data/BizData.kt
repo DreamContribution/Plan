@@ -1,13 +1,17 @@
 package com.frank.plan.data
 
-import android.app.Application
 import android.content.Context
-import android.util.Log
+import androidx.annotation.DrawableRes
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+/**
+ * Room中表结构，单次账单
+ */
 @Entity
 data class Bill(
     @PrimaryKey(autoGenerate = true) val id: Long? = null,
@@ -16,24 +20,44 @@ data class Bill(
     val time: LocalDate = LocalDate.now()// android min 26
 )
 
+/**
+ * 单日账单
+ */
 data class DayBill(
     val day: LocalDate,
     var totalMoney: Double,
     val bills: MutableList<Bill> = mutableListOf()
 )
 
+/**
+ * 月度总收入统计（Room中使用）
+ */
 data class FullInputPerMonth(
     val input: Double
 )
 
-@Entity
-data class BillType(
-    @PrimaryKey val id: Int,
+/**
+ * 页面中账单类型
+ */
+data class ItemTabUIData(
     val name: String,
-    val icon: String,
-    val weight: Int
+    var icon: ImageVector? = null,
+    var iconResource: Painter? = null
 )
 
+/**
+ * 账单添加中单个按钮的数据
+ */
+data class InputData(
+    val content: String,
+    val type: Int,
+    @DrawableRes val icon: Int? = null,
+    val imageVector: ImageVector? = null
+)
+
+/**
+ * Room中类型的转化
+ */
 class Converters {
     @TypeConverter
     fun fromTimestamp(value: String?): LocalDate? {
@@ -88,20 +112,4 @@ abstract class BillDataBase : RoomDatabase() {
             }
         }
     }
-}
-
-
-/**
- * test of data
- */
-fun dataBaseTest(context: Application): Flow<List<Bill>> {
-    val db =
-        Room.databaseBuilder(context, BillDataBase::class.java, "bill")
-            .build()
-
-    val billDao = db.billDao()
-
-    val billsByMonth = billDao.getBillsByMonth("2022-03-01", "2022-03-31")
-    Log.d(TAG, "dataBaseTest: $billsByMonth")
-    return billsByMonth
 }

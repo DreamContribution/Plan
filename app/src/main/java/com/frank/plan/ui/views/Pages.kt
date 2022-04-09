@@ -30,8 +30,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.frank.plan.data.Bill
 import com.frank.plan.data.PlanModel
 import com.frank.plan.ui.theme.PlanTheme
+import kotlinx.coroutines.flow.Flow
 
 
 const val TAG = "HistoryList"
@@ -41,16 +43,13 @@ const val ADD = "Add"
 
 @Composable
 fun HistoryList(changeTheme: () -> Unit) {
-    val planModel: PlanModel = viewModel()
-    val context = LocalContext.current
-    val monthlyBill = planModel.getBillByMonth(context).collectAsState(initial = null).value
-    Log.d(TAG, "HistoryList: --->")
+    Log.d(TAG, "HistoryList: view")
+
     Column(
         modifier = Modifier
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-
         Text(
             modifier = Modifier
                 .clickable {
@@ -65,17 +64,27 @@ fun HistoryList(changeTheme: () -> Unit) {
             color = PlanTheme.colors.titleTextColor
         )
         MonthlyInfo()
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(PlanTheme.colors.mainBg)
-        ) {
-            if (!monthlyBill.isNullOrEmpty()) {
-                items(monthlyBill) {
-                    DayBill(it)
-                }
+        BillList()
+    }
+}
+
+@Composable
+private fun BillList(listBill: Flow<Array<Bill>>? = null) {
+    val planModel: PlanModel = viewModel()
+    val context = LocalContext.current
+    val listBill = planModel.getBillByMonth(context)
+    val data = listBill.collectAsState(initial = null).value
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxHeight()
+            .background(PlanTheme.colors.mainBg)
+    ) {
+        if (data != null) {
+            items(data) {
+                DayBill(it)
             }
         }
+
     }
 }
 

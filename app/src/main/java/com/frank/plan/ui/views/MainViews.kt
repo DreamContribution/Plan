@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.frank.plan.R
 import com.frank.plan.data.*
 import com.frank.plan.ui.theme.PlanTheme
+import kotlinx.coroutines.flow.Flow
 import java.util.*
 
 /**
@@ -173,16 +174,8 @@ fun MonthSelectButton(onClick: () -> Unit) {
  * 收入、支出统计
  */
 @Composable
-fun MonthlyRecordTotal(label: String, modifier: Modifier) {
-    val planModel: PlanModel = viewModel()
-    val context = LocalContext.current
-    val num = if (label == "收入") {
-        0.0.toString()
-    } else {
-        Log.d(TAG, "MonthlyRecordTotal: -->$label")
-        planModel.getFullInputByMonth(context)
-            .collectAsState(initial = FullInputPerMonth(0.0)).value.input.toString()
-    }
+fun MonthlyRecordTotal(label: String, modifier: Modifier, data: Flow<FullInputPerMonth>? = null) {
+    val num = data?.collectAsState(initial = null)?.value?.input?.toString() ?: "0.0"
     Column(modifier = modifier) {
         Text(
             text = label,
@@ -204,9 +197,15 @@ fun MonthlyRecordTotal(label: String, modifier: Modifier) {
  */
 @Composable
 fun MonthlyInfo() {
+    Log.d(TAG, "MonthlyInfo: view")
     var showDialog by remember {
         mutableStateOf(false)
     }
+
+    val planModel: PlanModel = viewModel()
+    val context = LocalContext.current
+    val allInputPerMonth = planModel.getFullInputByMonth(context)
+
     Row(
         modifier = Modifier
             .background(color = PlanTheme.colors.titleBg)
@@ -217,7 +216,7 @@ fun MonthlyInfo() {
         MonthSelectButton { showDialog = true }
         Spacer(modifier = Modifier.width(30.dp))
         MonthlyRecordTotal(label = "收入", modifier = Modifier.weight(1f))
-        MonthlyRecordTotal(label = "支出", modifier = Modifier.weight(1f))
+        MonthlyRecordTotal(label = "支出", modifier = Modifier.weight(1f), data = allInputPerMonth)
         if (showDialog) {
             DateSelectorDialog {
                 showDialog = false
