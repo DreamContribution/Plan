@@ -129,7 +129,7 @@ fun NavHostZone(
         }
 
         composable(ADD) {
-            AddView(navController)
+            AddTitleView(navController)
         }
     }
 }
